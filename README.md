@@ -4,6 +4,8 @@ MarginAI 是一个面向 Obsidian 的 AI 辅助阅读批注插件。它不是“
 
 MarginAI is an Obsidian plugin for AI-assisted reading annotations. It is not a generic "chat with document" tool: answers are attached to the exact source text you selected, so the question, quote, and interpretation stay close to the reading context.
 
+![MarginAI demo](docs/assets/marginai-demo.gif)
+
 ## 中文
 
 ### 它解决什么问题
