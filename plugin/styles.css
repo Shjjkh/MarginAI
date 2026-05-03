@@ -102,7 +102,8 @@
   border-left: 3px solid var(--margin-ai-accent, var(--interactive-accent));
   padding-left: 8px;
   color: var(--text-muted);
-  font-size: var(--font-ui-smaller);
+  font-size: 13px;
+  line-height: 2;
 }
 
 .margin-ai-card-question {
@@ -112,12 +113,15 @@
   border-radius: 6px;
   background: var(--margin-ai-tint);
   color: var(--text-normal);
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 2;
 }
 
 .margin-ai-card-body {
   margin-top: 8px;
+  font-size: 14px;
+  line-height: 2;
   white-space: pre-wrap;
 }
 
