@@ -1,0 +1,68 @@
+.margin-ai-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 12px;
+}
+
+.margin-ai-toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.margin-ai-search {
+  width: 100%;
+}
+
+.margin-ai-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+}
+
+.margin-ai-card {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--background-primary);
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.margin-ai-card:hover,
+.margin-ai-card:focus-visible {
+  border-color: var(--interactive-accent);
+  outline: none;
+}
+
+.margin-ai-card.is-active {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 18%, transparent);
+}
+
+.margin-ai-card-quote {
+  border-left: 3px solid var(--interactive-accent);
+  padding-left: 8px;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.margin-ai-card-body {
+  margin-top: 8px;
+  white-space: pre-wrap;
+}
+
+.margin-ai-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.margin-ai-source-mark {
+  background: linear-gradient(transparent 58%, rgba(250, 204, 21, 0.55) 58%);
+  border-radius: 2px;
+  cursor: pointer;
+}
