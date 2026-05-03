@@ -2,6 +2,7 @@ import {
   App,
   Editor,
   ItemView,
+  MarkdownRenderer,
   MarkdownView,
   Notice,
   Plugin,
@@ -409,7 +410,17 @@ class AnnotationView extends ItemView {
       })
       card.createDiv({ text: annotation.quote, cls: 'margin-ai-card-quote' })
       card.createDiv({ text: annotation.question, cls: 'margin-ai-card-question' })
-      card.createDiv({ text: annotation.answer, cls: 'margin-ai-card-body' })
+      const body = card.createDiv({ cls: 'margin-ai-card-body' })
+      body.addEventListener('click', event => {
+        if ((event.target as HTMLElement).closest('a')) event.stopPropagation()
+      })
+      MarkdownRenderer.render(
+        this.app,
+        annotation.answer,
+        body,
+        annotation.sourcePath,
+        this
+      )
     })
   }
 

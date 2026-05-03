@@ -125,6 +125,17 @@
   white-space: pre-wrap;
 }
 
+.margin-ai-card-body p,
+.margin-ai-card-body ul,
+.margin-ai-card-body ol {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+.margin-ai-card-body > :last-child {
+  margin-bottom: 0;
+}
+
 .margin-ai-card-actions {
   display: flex;
   flex-wrap: wrap;
