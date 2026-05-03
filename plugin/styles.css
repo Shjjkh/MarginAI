@@ -23,12 +23,51 @@
 }
 
 .margin-ai-card {
-  border: 1px solid var(--background-modifier-border);
+  --margin-ai-accent: var(--interactive-accent);
+  --margin-ai-tint: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+  --margin-ai-tint-strong: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
+  border: 1px solid transparent;
   border-radius: 8px;
   padding: 10px;
   background: var(--background-primary);
   cursor: pointer;
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.margin-ai-card.is-concept {
+  --margin-ai-accent: #7c6ee6;
+  --margin-ai-tint: rgba(124, 110, 230, 0.12);
+  --margin-ai-tint-strong: rgba(124, 110, 230, 0.2);
+}
+
+.margin-ai-card.is-confusion {
+  --margin-ai-accent: #f2b84b;
+  --margin-ai-tint: rgba(242, 184, 75, 0.14);
+  --margin-ai-tint-strong: rgba(242, 184, 75, 0.24);
+}
+
+.margin-ai-card.is-discussion {
+  --margin-ai-accent: #e89adf;
+  --margin-ai-tint: rgba(232, 154, 223, 0.14);
+  --margin-ai-tint-strong: rgba(232, 154, 223, 0.24);
+}
+
+.margin-ai-card.is-summary {
+  --margin-ai-accent: #8fb7f4;
+  --margin-ai-tint: rgba(143, 183, 244, 0.16);
+  --margin-ai-tint-strong: rgba(143, 183, 244, 0.26);
+}
+
+.margin-ai-card.is-translation {
+  --margin-ai-accent: #73cfc1;
+  --margin-ai-tint: rgba(115, 207, 193, 0.15);
+  --margin-ai-tint-strong: rgba(115, 207, 193, 0.25);
+}
+
+.margin-ai-card.is-writing {
+  --margin-ai-accent: #c5aaef;
+  --margin-ai-tint: rgba(197, 170, 239, 0.15);
+  --margin-ai-tint-strong: rgba(197, 170, 239, 0.25);
 }
 
 .margin-ai-question-panel {
@@ -48,20 +87,41 @@
 
 .margin-ai-card:hover,
 .margin-ai-card:focus-visible {
-  border-color: var(--interactive-accent);
+  border-color: var(--margin-ai-accent);
+  background: color-mix(in srgb, var(--background-primary) 88%, var(--margin-ai-accent) 12%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   outline: none;
 }
 
 .margin-ai-card.is-active {
-  border-color: var(--interactive-accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 18%, transparent);
+  border-color: var(--margin-ai-accent);
+  box-shadow: 0 0 0 2px var(--margin-ai-tint-strong);
 }
 
 .margin-ai-card-quote {
-  border-left: 3px solid var(--interactive-accent);
+  border-left: 3px solid var(--margin-ai-accent, var(--interactive-accent));
   padding-left: 8px;
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
+}
+
+.margin-ai-card-question {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: var(--margin-ai-tint);
+  color: var(--text-normal);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.margin-ai-card-type {
+  color: var(--margin-ai-accent);
+  font-weight: 600;
 }
 
 .margin-ai-card-body {

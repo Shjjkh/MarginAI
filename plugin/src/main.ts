@@ -23,6 +23,13 @@ const MARGIN_AI_ICON = `<path d="M6 3.5h8l4 4v13H6z"/>
 <path d="M20 18h-4"/>`
 
 type ChatRole = 'system' | 'user' | 'assistant'
+type AnnotationIntent =
+  | 'concept'
+  | 'confusion'
+  | 'discussion'
+  | 'summary'
+  | 'translation'
+  | 'writing'
 
 interface ChatMessage {
   role: ChatRole
@@ -45,6 +52,7 @@ interface MarginAIAnnotation {
   question: string
   answer: string
   createdAt: number
+  intent?: AnnotationIntent
 }
 
 interface MarginAIData {
@@ -79,6 +87,23 @@ const OUTPUT_RULES = `输出会直接保存到用户选中文本旁边的批注�
 const WRAPPED_MARKDOWN_RE = /^\s*```(?:markdown|md)?\s*\n([\s\S]*?)\n```\s*$/i
 const LEADING_LABEL_RE = /^(?:answer|assistant|回复|回答|答案)\s*[:：]\s*/i
 const ECHOED_LABEL_RE = /^(?:已选原文|用户问题|passage|question)\s*[:：].*$/i
+const INTENT_META: Record<AnnotationIntent, { label: string; className: string }> = {
+  concept: { label: '概念解释', className: 'is-concept' },
+  confusion: { label: '原文解惑', className: 'is-confusion' },
+  discussion: { label: '深入讨论', className: 'is-discussion' },
+  summary: { label: '总结提炼', className: 'is-summary' },
+  translation: { label: '翻译改写', className: 'is-translation' },
+  writing: { label: '写作润色', className: 'is-writing' }
+}
+
+const INTENT_PATTERNS: Array<[AnnotationIntent, RegExp]> = [
+  ['translation', /(翻译|译成|译为|translate|translation|英文|英语|中文|日文|日语|韩文|韩语)/i],
+  ['summary', /(总结|概括|归纳|提炼|摘要|要点|summary|summarize|tl;?dr|main points?)/i],
+  ['writing', /(改写|润色|优化表达|换个说法|更通俗|更学术|整理成|rewrite|polish|paraphrase)/i],
+  ['concept', /(是什么|什么意思|含义|概念|定义|区别|关系|解释一下|什么是|meaning|concept|define|definition|explain)/i],
+  ['confusion', /(为什么|为何|怎么理解|如何理解|没懂|不懂|看不懂|疑惑|逻辑|推理|依据|why|confus|understand)/i],
+  ['discussion', /(怎么看|是否成立|合理吗|评价|深入|展开|讨论|启发|延伸|think|discuss|evaluate|analysis|analyze)/i]
+]
 
 function normalizeAiAnswer(answer: string): string {
   let normalized = answer.replace(/\r\n/g, '\n').trim()
@@ -93,6 +118,14 @@ function normalizeAiAnswer(answer: string): string {
 
   normalized = normalized.replace(LEADING_LABEL_RE, '').trim()
   return normalized || answer.trim()
+}
+
+function detectIntent(question: string): AnnotationIntent {
+  const normalized = question.trim()
+  for (const [intent, pattern] of INTENT_PATTERNS) {
+    if (pattern.test(normalized)) return intent
+  }
+  return 'discussion'
 }
 
 function escapeRegExp(value: string): string {
@@ -160,9 +193,11 @@ function sanitizeFileName(value: string): string {
 }
 
 function annotationBlock(annotation: MarginAIAnnotation, sourceFile: TFile): string {
+  const intent = annotation.intent ?? detectIntent(annotation.question)
   return [
     `标识：${annotation.id}`,
     `来源：${sourceWikiLink(sourceFile)}`,
+    `分类：${INTENT_META[intent].label}`,
     '',
     `> ${annotation.quote.replace(/\n/g, '\n> ')}`,
     '',
@@ -355,8 +390,10 @@ class AnnotationView extends ItemView {
     }
 
     annotations.forEach(annotation => {
+      const intent = annotation.intent ?? detectIntent(annotation.question)
+      const intentMeta = INTENT_META[intent]
       const card = list.createDiv({
-        cls: `margin-ai-card${annotation.id === this.activeId ? ' is-active' : ''}`
+        cls: `margin-ai-card ${intentMeta.className}${annotation.id === this.activeId ? ' is-active' : ''}`
       })
       card.setAttribute('role', 'button')
       card.setAttribute('tabindex', '0')
@@ -374,7 +411,9 @@ class AnnotationView extends ItemView {
         }
       })
       card.createDiv({ text: annotation.quote, cls: 'margin-ai-card-quote' })
-      card.createDiv({ text: `问：${annotation.question}`, cls: 'margin-ai-card-body' })
+      const questionEl = card.createDiv({ cls: 'margin-ai-card-question' })
+      questionEl.createSpan({ text: intentMeta.label, cls: 'margin-ai-card-type' })
+      questionEl.createSpan({ text: annotation.question })
       card.createDiv({ text: annotation.answer, cls: 'margin-ai-card-body' })
 
       const actions = card.createDiv({ cls: 'margin-ai-card-actions' })
@@ -586,7 +625,8 @@ export default class MarginAIPlugin extends Plugin {
         anchorOffset: input.anchorOffset,
         question: input.question,
         answer,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        intent: detectIntent(input.question)
       }
 
       this.annotations.push(annotation)
