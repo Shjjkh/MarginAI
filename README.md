@@ -1,12 +1,13 @@
 # MarginAI
 
-MarginAI 是一个面向 Obsidian 的 AI 辅助阅读批注插件。它不是“和整篇文档聊天”的工具，而是把 AI 回答绑定到你正在阅读的原文片段旁边，让问题、原文和理解过程保留在同一个阅读上下文里。
-
-MarginAI is an Obsidian plugin for AI-assisted reading annotations. It is not a generic "chat with document" tool: answers are attached to the exact source text you selected, so the question, quote, and interpretation stay close to the reading context.
+[![中文](https://img.shields.io/badge/README-中文-blue)](#中文)
+[![English](https://img.shields.io/badge/README-English-lightgrey)](#english)
 
 ![MarginAI demo](docs/assets/marginai-demo.gif)
 
 ## 中文
+
+MarginAI 是一个面向 Obsidian 的 AI 辅助阅读批注插件。它不是“和整篇文档聊天”的工具，而是把 AI 回答绑定到你正在阅读的原文片段旁边，让问题、原文和理解过程保留在同一个阅读上下文里。
 
 ### 它解决什么问题
 
@@ -79,6 +80,8 @@ MarginAI 是 local-first 的 Obsidian 插件。批注数据保存在本地插件
 这是一个早期项目。欢迎提交 issue、建议、回答 skill、UI 改进和代码贡献。当前重点是把“选中原文 -> 提问/批注 -> 回到原文 -> 生成笔记”的核心阅读闭环做稳。
 
 ## English
+
+MarginAI is an Obsidian plugin for AI-assisted reading annotations. It is not a generic "chat with document" tool: answers are attached to the exact source text you selected, so the question, quote, and interpretation stay close to the reading context.
 
 ### What It Does
 
