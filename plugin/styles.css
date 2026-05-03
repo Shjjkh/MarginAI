@@ -106,10 +106,7 @@
 }
 
 .margin-ai-card-question {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: inline-block;
   margin-top: 10px;
   padding: 4px 7px;
   border-radius: 6px;
@@ -117,11 +114,6 @@
   color: var(--text-normal);
   font-weight: 500;
   line-height: 1.45;
-}
-
-.margin-ai-card-type {
-  color: var(--margin-ai-accent);
-  font-weight: 600;
 }
 
 .margin-ai-card-body {

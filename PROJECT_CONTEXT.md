@@ -48,7 +48,7 @@ Confirmed constraints:
 - Selecting text should reveal a small floating input panel where the user can ask AI about the selection.
 - In the Obsidian plugin implementation, selecting text and running the ask command should open/focus the MarginAI sidebar and show the question input there rather than using a modal. `Enter` submits the question; `Shift+Enter` inserts a newline.
 - AI responses should appear in the annotation area together with the user's question.
-- Annotation cards should use subtle hover-only border emphasis. User questions should be displayed with a translucent tinted background, and cards should be color-coded by rough question intent: concept explanation, source confusion, deeper discussion, summary, translation, and writing help.
+- Annotation cards should use subtle hover-only border emphasis. User questions should be displayed with a translucent tinted background, and cards should be color-coded by rough question intent without exposing explicit intent labels to users.
 - Users should be able to edit AI-generated answers.
 - Users should be able to continue asking follow-up questions on an annotation, with the AI using prior context.
 - Annotation cards should be visually positioned beside their selected source text, scrolling with the reading area rather than behaving as an independent static list.
