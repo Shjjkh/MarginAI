@@ -3,7 +3,6 @@ import {
   Editor,
   ItemView,
   MarkdownView,
-  Modal,
   Notice,
   Plugin,
   PluginSettingTab,
@@ -44,6 +43,12 @@ interface MarginAIAnnotation {
 interface MarginAIData {
   settings: MarginAISettings
   annotations: MarginAIAnnotation[]
+}
+
+interface PendingQuestion {
+  file: TFile
+  quote: string
+  anchorOffset: number
 }
 
 const DEFAULT_SETTINGS: MarginAISettings = {
@@ -171,58 +176,6 @@ function sidecarHeader(sourceFile: TFile): string {
   ].join('\n')
 }
 
-class AskQuestionModal extends Modal {
-  private question = ''
-
-  constructor(
-    app: App,
-    private readonly quote: string,
-    private readonly onSubmit: (question: string) => void
-  ) {
-    super(app)
-  }
-
-  onOpen(): void {
-    const { contentEl } = this
-    contentEl.empty()
-    contentEl.createEl('p', { text: '已选原文', cls: 'setting-item-description' })
-    contentEl.createEl('blockquote', { text: this.quote })
-
-    new Setting(contentEl)
-      .setName('问题')
-      .addTextArea(text => {
-        text
-          .setPlaceholder('你想问什么？')
-          .onChange(value => {
-            this.question = value
-          })
-        text.inputEl.rows = 4
-        text.inputEl.focus()
-      })
-
-    new Setting(contentEl)
-      .addButton(button => {
-        button
-          .setButtonText('取消')
-          .onClick(() => this.close())
-      })
-      .addButton(button => {
-        button
-          .setCta()
-          .setButtonText('发送')
-          .onClick(() => {
-            const q = this.question.trim()
-            if (!q) {
-              new Notice('请输入问题')
-              return
-            }
-            this.close()
-            this.onSubmit(q)
-          })
-      })
-  }
-}
-
 class MarginAISettingTab extends PluginSettingTab {
   constructor(app: App, private readonly plugin: MarginAIPlugin) {
     super(app, plugin)
@@ -279,6 +232,9 @@ class MarginAISettingTab extends PluginSettingTab {
 class AnnotationView extends ItemView {
   private search = ''
   private activeId: string | null = null
+  private pending: PendingQuestion | null = null
+  private pendingQuestion = ''
+  private submitting = false
 
   constructor(leaf: WorkspaceLeaf, private readonly plugin: MarginAIPlugin) {
     super(leaf)
@@ -298,6 +254,12 @@ class AnnotationView extends ItemView {
 
   setActive(annotationId: string): void {
     this.activeId = annotationId
+    this.render()
+  }
+
+  setPendingQuestion(pending: PendingQuestion): void {
+    this.pending = pending
+    this.pendingQuestion = ''
     this.render()
   }
 
@@ -329,6 +291,40 @@ class AnnotationView extends ItemView {
     if (!currentPath) {
       list.createEl('p', { text: '请先打开一个 Markdown 文件。', cls: 'setting-item-description' })
       return
+    }
+
+    if (this.pending && this.pending.file.path === currentPath) {
+      const panel = list.createDiv({ cls: 'margin-ai-question-panel' })
+      panel.createDiv({ text: this.pending.quote, cls: 'margin-ai-card-quote' })
+      const textarea = panel.createEl('textarea', {
+        placeholder: '输入问题，Enter 提问，Shift+Enter 换行',
+        cls: 'margin-ai-question-input'
+      })
+      textarea.value = this.pendingQuestion
+      textarea.disabled = this.submitting
+      textarea.addEventListener('input', () => {
+        this.pendingQuestion = textarea.value
+      })
+      textarea.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault()
+          this.submitPendingQuestion()
+        }
+      })
+
+      const actions = panel.createDiv({ cls: 'margin-ai-card-actions' })
+      actions.createEl('button', { text: '取消' }).addEventListener('click', () => {
+        this.pending = null
+        this.pendingQuestion = ''
+        this.render()
+      })
+      const submitButton = actions.createEl('button', { text: this.submitting ? '提问中...' : '提问' })
+      submitButton.disabled = this.submitting
+      submitButton.addEventListener('click', () => {
+        this.submitPendingQuestion()
+      })
+
+      window.setTimeout(() => textarea.focus(), 0)
     }
 
     const query = this.search.trim().toLowerCase()
@@ -385,6 +381,33 @@ class AnnotationView extends ItemView {
         await this.plugin.openPath(annotation.sidecarPath)
       })
     })
+  }
+
+  private async submitPendingQuestion(): Promise<void> {
+    if (!this.pending || this.submitting) return
+
+    const question = this.pendingQuestion.trim()
+    if (!question) {
+      new Notice('请输入问题')
+      return
+    }
+
+    this.submitting = true
+    this.render()
+
+    const saved = await this.plugin.createAnnotation({
+      file: this.pending.file,
+      quote: this.pending.quote,
+      question,
+      anchorOffset: this.pending.anchorOffset
+    })
+
+    this.submitting = false
+    if (saved) {
+      this.pending = null
+      this.pendingQuestion = ''
+    }
+    this.render()
   }
 }
 
@@ -491,7 +514,7 @@ export default class MarginAIPlugin extends Plugin {
     this.annotations = data?.annotations ?? []
   }
 
-  private async activateView(): Promise<void> {
+  async activateView(): Promise<void> {
     const { workspace } = this.app
     let leaf: WorkspaceLeaf | null = workspace.getLeavesOfType(VIEW_TYPE_ANNOTATIONS)[0] ?? null
 
@@ -515,20 +538,20 @@ export default class MarginAIPlugin extends Plugin {
 
     const from = editor.getCursor('from')
     const anchorOffset = editor.posToOffset(from)
-    new AskQuestionModal(this.app, quote, question => {
-      this.createAnnotation({ file, quote, question, anchorOffset })
-    }).open()
+    this.activateView().then(() => {
+      this.view?.setPendingQuestion({ file, quote, anchorOffset })
+    })
   }
 
-  private async createAnnotation(input: {
+  async createAnnotation(input: {
     file: TFile
     quote: string
     question: string
     anchorOffset: number
-  }): Promise<void> {
+  }): Promise<boolean> {
     if (!this.settings.apiKey) {
       new Notice('请先在 MarginAI 设置中配置 API Key')
-      return
+      return false
     }
 
     const notice = new Notice('MarginAI 正在生成批注...', 0)
@@ -559,9 +582,11 @@ export default class MarginAIPlugin extends Plugin {
       await this.persist()
       await this.activateView()
       new Notice('批注已保存')
+      return true
     } catch (error) {
       console.error(error)
       new Notice(`批注失败：${error instanceof Error ? error.message : String(error)}`)
+      return false
     } finally {
       notice.hide()
     }

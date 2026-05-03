@@ -31,6 +31,21 @@
   transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
+.margin-ai-question-panel {
+  border: 1px solid var(--interactive-accent);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--background-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+}
+
+.margin-ai-question-input {
+  width: 100%;
+  min-height: 92px;
+  margin-top: 10px;
+  resize: vertical;
+}
+
 .margin-ai-card:hover,
 .margin-ai-card:focus-visible {
   border-color: var(--interactive-accent);

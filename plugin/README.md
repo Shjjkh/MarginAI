@@ -6,6 +6,7 @@ Current v1 flow:
 
 - Select text in a Markdown note.
 - Run `MarginAI: 对选中文本提问`.
+- Enter the question in the MarginAI sidebar. `Enter` submits, `Shift+Enter` inserts a new line.
 - The plugin sends the selected text and question to an OpenAI-compatible API.
 - The answer is saved as a visible Markdown annotation sidecar in the vault.
 - The MarginAI sidebar lists annotations for the current Markdown file and can open the source note or sidecar file.
