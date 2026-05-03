@@ -410,17 +410,6 @@ class AnnotationView extends ItemView {
       card.createDiv({ text: annotation.quote, cls: 'margin-ai-card-quote' })
       card.createDiv({ text: annotation.question, cls: 'margin-ai-card-question' })
       card.createDiv({ text: annotation.answer, cls: 'margin-ai-card-body' })
-
-      const actions = card.createDiv({ cls: 'margin-ai-card-actions' })
-      actions.addEventListener('click', event => event.stopPropagation())
-      actions.createEl('button', { text: '定位原文' }).addEventListener('click', async event => {
-        event.stopPropagation()
-        await locate()
-      })
-      actions.createEl('button', { text: '打开批注文件' }).addEventListener('click', async event => {
-        event.stopPropagation()
-        await this.plugin.openPath(annotation.sidecarPath)
-      })
     })
   }
 
