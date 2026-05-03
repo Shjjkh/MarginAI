@@ -455,6 +455,10 @@ export default class MarginAIPlugin extends Plugin {
     }))
 
     this.addSettingTab(new MarginAISettingTab(this.app, this))
+
+    this.app.workspace.onLayoutReady(() => {
+      this.activateView()
+    })
   }
 
   onunload(): void {

@@ -88,6 +88,7 @@ Likely engineering implications:
 - Default vault folder in the plugin prototype: `MarginAI/Annotations` for sidecar annotation files.
 - The initial plugin implementation saves annotation bodies to visible sidecar Markdown files and stores the fast lookup/index metadata in Obsidian plugin data.
 - The sidebar view is file-scoped: switching the active Markdown file should refresh the sidebar to that file's annotations.
+- The MarginAI sidebar should open automatically when the plugin loads after the Obsidian workspace layout is ready.
 - AI annotation answers should be simple Markdown bodies that can be saved directly: no JSON/XML/HTML/code fences/tables, no preamble, same language as the user question, short paragraphs or flat bullet lists only. The app normalizes common weak-model output drift before saving answers.
 - AI requests should first be routed through a rough intent classifier, then use intent-specific prompt strategy, information boundary, context inclusion, and length constraints. Current intents: concept explanation, confusion about source text, deeper discussion, summary, translation, writing/rephrasing help, and follow-up handling via reclassification of the latest follow-up question.
 - In v1, web search is explicitly unavailable. Concept explanation may use model knowledge, but source-text questions, summaries, translations, and writing help must respect the selected text and distinguish any background supplement from what the source actually says.
