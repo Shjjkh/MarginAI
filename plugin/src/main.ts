@@ -424,7 +424,7 @@ export default class MarginAIPlugin extends Plugin {
       return this.view
     })
 
-    this.addRibbonIcon('message-square-text', 'MarginAI 批注', () => {
+    this.addRibbonIcon('panel-right', 'MarginAI 批注', () => {
       this.activateView()
     })
 
