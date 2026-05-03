@@ -275,6 +275,7 @@ class AnnotationView extends ItemView {
   private activeId: string | null = null
   private pending: PendingQuestion | null = null
   private pendingQuestion = ''
+  private renderedPath: string | null = null
   private submitting = false
 
   constructor(leaf: WorkspaceLeaf, private readonly plugin: MarginAIPlugin) {
@@ -295,7 +296,7 @@ class AnnotationView extends ItemView {
 
   setActive(annotationId: string): void {
     this.activeId = annotationId
-    this.render()
+    this.updateActiveCard()
   }
 
   setPendingQuestion(pending: PendingQuestion): void {
@@ -311,6 +312,7 @@ class AnnotationView extends ItemView {
 
     const currentFile = this.plugin.currentMarkdownFile()
     const currentPath = currentFile?.path
+    this.renderedPath = currentPath ?? null
     container.createEl('div', {
       text: currentFile ? `当前文件：${currentFile.basename}` : '当前文件：未打开 Markdown',
       cls: 'setting-item-description'
@@ -393,13 +395,14 @@ class AnnotationView extends ItemView {
       const card = list.createDiv({
         cls: `margin-ai-card ${INTENT_CLASS_NAMES[intent]}${annotation.id === this.activeId ? ' is-active' : ''}`
       })
+      card.dataset.annotationId = annotation.id
       card.setAttribute('role', 'button')
       card.setAttribute('tabindex', '0')
       card.setAttribute('aria-label', '定位到原文')
       const locate = async () => {
         this.activeId = annotation.id
+        this.updateActiveCard()
         await this.plugin.openSource(annotation)
-        this.render()
       }
       card.addEventListener('click', locate)
       card.addEventListener('keydown', event => {
@@ -421,6 +424,17 @@ class AnnotationView extends ItemView {
         annotation.sourcePath,
         this
       )
+    })
+  }
+
+  handleFileOpen(file: TFile | null): void {
+    const nextPath = file?.extension === 'md' ? file.path : null
+    if (nextPath !== this.renderedPath) this.render()
+  }
+
+  private updateActiveCard(): void {
+    this.containerEl.querySelectorAll<HTMLElement>('.margin-ai-card').forEach(card => {
+      card.classList.toggle('is-active', card.dataset.annotationId === this.activeId)
     })
   }
 
@@ -492,8 +506,8 @@ export default class MarginAIPlugin extends Plugin {
       this.markRenderedAnnotations(el, ctx.sourcePath)
     })
 
-    this.registerEvent(this.app.workspace.on('file-open', () => {
-      this.view?.render()
+    this.registerEvent(this.app.workspace.on('file-open', file => {
+      this.view?.handleFileOpen(file)
     }))
 
     this.addSettingTab(new MarginAISettingTab(this.app, this))
