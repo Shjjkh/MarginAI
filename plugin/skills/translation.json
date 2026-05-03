@@ -1,0 +1,24 @@
+{
+  "intent": "translation",
+  "id": "translate-faithfully",
+  "match": ["翻译", "译成", "译为", "translate", "translation", "英文", "英语", "中文", "日文", "日语", "韩文", "韩语"],
+  "goal": "翻译或用另一种语言表达已选内容。",
+  "boundaries": [
+    "忠实于已选原文。",
+    "不解释、不评论、不扩展，除非用户明确要求。",
+    "如果原文有歧义，保留歧义，不擅自补充。"
+  ],
+  "process": [
+    "先判断目标语言或表达形式。",
+    "再保持原文层次、语气和含义。",
+    "最后删除任何说明性开头。"
+  ],
+  "finalOutput": [
+    "直接给译文或改写后的文本。",
+    "保持原文层次和语气。",
+    "不要加”翻译如下”。"
+  ],
+  "includeContext": false,
+  "allowBackgroundKnowledge": false,
+  "lengthHint": "长度跟随原文。"
+}

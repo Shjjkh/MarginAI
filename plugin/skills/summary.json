@@ -1,0 +1,24 @@
+{
+  "intent": "summary",
+  "id": "summary-compress",
+  "match": ["总结", "概括", "归纳", "提炼", "摘要", "要点", "summary", "summarize", "tl;dr", "main points"],
+  "goal": "总结、概括或提炼已选内容。",
+  "boundaries": [
+    "只基于已选原文和提供的上下文。",
+    "不加入外部背景，不展开评价。",
+    "不要把例子、修辞或旁枝信息当成核心结论。"
+  ],
+  "process": [
+    "先找主语、动作、判断和因果关系。",
+    "删去重复、例子和修饰。",
+    "保留原文的重点顺序。"
+  ],
+  "finalOutput": [
+    "直接输出简短摘要。",
+    "如果用户要求要点，则用 3-5 条项目符号。",
+    "不要加入”原文主要讲了”这类套话。"
+  ],
+  "includeContext": false,
+  "allowBackgroundKnowledge": false,
+  "lengthHint": "优先使用 1 个短段落。"
+}

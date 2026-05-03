@@ -1,0 +1,24 @@
+{
+  "intent": "discussion",
+  "id": "source-grounded-discussion",
+  "match": ["怎么看", "是否成立", "合理吗", "评价", "深入", "展开", "讨论", "启发", "延伸", "think", "discuss", "evaluate", "analysis", "analyze"],
+  "goal": "围绕已选原文进行深入讨论、评价或延伸思考。",
+  "boundaries": [
+    "先说明原文明确表达了什么。",
+    "可以展开分析，但必须把”原文依据”和”延伸判断”分开。",
+    "不要编造原文没有的信息。"
+  ],
+  "process": [
+    "先提炼原文可支持的核心判断。",
+    "再判断用户问题需要评价、反驳、延伸还是启发。",
+    "最后分开写原文依据和你的延伸分析。"
+  ],
+  "finalOutput": [
+    "先给核心判断。",
+    "然后展开 2-4 个分析点。",
+    "需要延伸时，用”进一步看”或自然转折区分延伸判断。"
+  ],
+  "includeContext": true,
+  "allowBackgroundKnowledge": true,
+  "lengthHint": "默认中等篇幅，约 4-6 个短段落或 4-7 条要点；避免长篇泛泛而谈。"
+}

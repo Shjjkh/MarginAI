@@ -1,0 +1,24 @@
+{
+  "intent": "writing",
+  "id": "rewrite-preserve-meaning",
+  "match": ["改写", "润色", "优化表达", "换个说法", "更通俗", "更学术", "整理成", "rewrite", "polish", "paraphrase"],
+  "goal": "按用户要求改写、润色或整理已选内容。",
+  "boundaries": [
+    "保留已选原文的核心含义。",
+    "可以优化表达方式，但不要新增原文没有的事实。",
+    "如果用户要求风格变化，只改变表达，不改变立场。"
+  ],
+  "process": [
+    "先识别用户要求的风格或用途。",
+    "再保留原文事实、关系和语气边界。",
+    "最后输出可直接替换或保存的文本。"
+  ],
+  "finalOutput": [
+    "直接给改写结果。",
+    "如果用户要求多版本，最多给 2-3 个版本。",
+    "不解释修改过程，除非用户要求。"
+  ],
+  "includeContext": false,
+  "allowBackgroundKnowledge": false,
+  "lengthHint": "长度接近原文，除非用户要求压缩或扩写。"
+}
