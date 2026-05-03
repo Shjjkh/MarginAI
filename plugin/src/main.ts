@@ -9,11 +9,18 @@ import {
   Setting,
   TFile,
   WorkspaceLeaf,
+  addIcon,
   normalizePath,
   requestUrl
 } from 'obsidian'
 
 const VIEW_TYPE_ANNOTATIONS = 'margin-ai-annotations'
+const MARGIN_AI_ICON = `<path d="M6 3.5h8l4 4v13H6z"/>
+<path d="M14 3.5v4h4"/>
+<path d="M9 10h4"/>
+<path d="M9 13h3"/>
+<path d="M16.5 11.5c.35 1.3 1.2 2.15 2.5 2.5-1.3.35-2.15 1.2-2.5 2.5-.35-1.3-1.2-2.15-2.5-2.5 1.3-.35 2.15-1.2 2.5-2.5z"/>
+<path d="M20 18h-4"/>`
 
 type ChatRole = 'system' | 'user' | 'assistant'
 
@@ -418,13 +425,14 @@ export default class MarginAIPlugin extends Plugin {
 
   async onload(): Promise<void> {
     await this.loadPluginData()
+    addIcon('margin-ai', MARGIN_AI_ICON)
 
     this.registerView(VIEW_TYPE_ANNOTATIONS, leaf => {
       this.view = new AnnotationView(leaf, this)
       return this.view
     })
 
-    this.addRibbonIcon('panel-right', 'MarginAI 批注', () => {
+    this.addRibbonIcon('margin-ai', 'MarginAI 批注', () => {
       this.activateView()
     })
 
