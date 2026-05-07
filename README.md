@@ -1,161 +1,328 @@
-# MarginAI
+# MarginAI — Obsidian AI Reading Annotations
 
-[![中文](https://img.shields.io/badge/README-中文-blue)](#中文)
-[![English](https://img.shields.io/badge/README-English-lightgrey)](#english)
+> 选中一段原文，向 AI 提问或写下自己的批注，并把回答留在原文旁边。MarginAI 帮你把阅读中的问题、解释和笔记固定在具体文本上，而不是散落在聊天记录里。
+
+[English](#english) | 简体中文
 
 ![MarginAI demo](docs/assets/marginai-demo.gif)
 
-## 中文
+---
 
-MarginAI 是一个面向 Obsidian 的 AI 辅助阅读批注插件。它不是“和整篇文档聊天”的工具，而是把 AI 回答绑定到你正在阅读的原文片段旁边，让问题、原文和理解过程保留在同一个阅读上下文里。
+## 简体中文
 
-### 它解决什么问题
+### 这个插件解决什么问题？
 
-阅读长文、论文、访谈和技术文档时，很多问题都来自某一小段原文。MarginAI 的目标是让你：
+读长文章、论文、访谈和技术文档时，真正需要理解的往往不是整篇文档，而是某一段具体原文：
 
-- 选中 Markdown 笔记中的一段原文；
-- 针对这段原文提问或写下自己的批注；
-- 在侧边栏中看到和当前文件相关的批注卡片；
-- 点击批注快速定位回原文；
-- 需要时把批注保存为独立 Markdown 笔记，并和原文建立链接。
+- 看到一个概念，想马上问“这是什么意思？”
+- 读到一段论证，想确认“作者为什么这么说？”
+- 想把自己的理解写下来，但又不想打断原文结构
+- 之后复习时，希望能从批注直接跳回原文位置
 
-### 当前功能
+MarginAI 的核心思路是：让批注绑定到你选中的原文片段。你可以向 AI 提问，也可以写个人批注；所有批注都会出现在当前文件的侧边栏里，并按原文顺序排列。
 
-- 文件级批注侧边栏：只显示当前 Markdown 文件的批注。
-- AI 批注：选中文本后提问，使用 OpenAI-compatible API 生成回答。
-- 个人批注：不调用 AI，直接保存自己的阅读笔记。
-- 原文定位：批注卡片可以跳回对应原文位置。
-- 卡片展开/收起：长回答默认折叠，按原文顺序排列。
-- 批注编辑：直接修改已生成的回答正文。
-- 保存为笔记：把批注生成到 vault 内的 Markdown 文件。
-- 回答 Skills：内置 JSON skill 可检查、可覆盖，用于控制不同问题类型的回答策略。
-- 可选联网搜索：概念解释/延伸讨论可通过 Tavily 或自定义搜索接口补充外部资料。
+---
 
-### 安装和本地测试
+### 能做什么？
 
-当前项目还处于早期开发阶段，暂未发布到 Obsidian 社区插件市场。可以手动安装：
+| 功能 | 怎么用 | 结果 |
+| --- | --- | --- |
+| AI 批注 | 选中原文，运行 `MarginAI: 对选中文本提问` | AI 根据选中原文生成解释、总结、翻译或推断 |
+| 个人批注 | 选中原文，运行 `MarginAI: 增加批注` | 不调用 AI，直接保存自己的阅读笔记 |
+| 批注侧边栏 | 打开 Markdown 文件后查看右侧 MarginAI 面板 | 只显示当前文件的批注，并按原文顺序排列 |
+| 定位原文 | 点击批注卡片 | 跳回对应原文位置 |
+| 编辑批注 | 在卡片菜单中选择编辑 | 修改已生成或手写的批注正文 |
+| 保存为笔记 | 在卡片菜单中选择保存为笔记 | 在 vault 中生成独立 Markdown 笔记 |
+| 回答 Skills | 使用内置或自定义 JSON skill | 针对解释、总结、翻译、写作等问题使用不同回答策略 |
+| 联网搜索 | 在设置中开启 Tavily 或自定义搜索接口 | 为概念解释和延伸讨论补充外部资料 |
 
-```bash
-cd plugin
-npm install
-npm run build
-```
+---
 
-然后把以下文件复制到你的 Obsidian vault：
+### 安装方法
+
+MarginAI 目前是早期项目，暂未发布到 Obsidian 社区插件市场。可以手动安装：
+
+1. 下载或 clone 这个仓库：
+
+   ```bash
+   git clone https://github.com/Shjjkh/MarginAI.git
+   cd MarginAI/plugin
+   ```
+
+2. 安装依赖并构建插件：
+
+   ```bash
+   npm install
+   npm run build
+   ```
+
+3. 在你的 Obsidian vault 里创建插件目录：
+
+   ```text
+   .obsidian/plugins/margin-ai/
+   ```
+
+4. 把下面这些文件复制进去：
+
+   ```text
+   plugin/manifest.json
+   plugin/main.js
+   plugin/styles.css
+   plugin/skills/
+   ```
+
+5. 重启 Obsidian，进入 Settings -> Community plugins，启用 MarginAI。
+
+---
+
+### 快速上手（推荐顺序）
+
+#### 第一步：配置 AI 服务
+
+打开 MarginAI 设置，填写：
 
 ```text
-.obsidian/plugins/margin-ai/
-  manifest.json
-  main.js
-  styles.css
-  skills/
+API Base URL: https://api.openai.com/v1
+API Key: 你的 API key
+Model: 你要使用的模型名称
 ```
 
-重启 Obsidian，或在设置中重新加载插件。
+MarginAI 使用 OpenAI-compatible API。你也可以填写兼容 OpenAI 格式的其他服务或本地模型网关。
 
-### 配置
+#### 第二步：选中原文并提问
 
-在 MarginAI 设置中配置：
+在 Markdown 文件里选中一段文字，然后运行命令：
 
-- API Base URL：任何 OpenAI-compatible endpoint，例如 OpenAI、兼容层服务或本地模型网关。
-- API Key：仅保存在本地 Obsidian 插件数据中。
-- Model：你的目标模型名称。
-- 自定义 Skills 文件夹：默认 `MarginAI/Skills`，可用来覆盖内置回答策略。
-- 联网搜索：可选，默认支持 Tavily Search API，也支持自定义 URL 模板。
+```text
+MarginAI: 对选中文本提问
+```
 
-默认生成的批注笔记目录：
+侧边栏会出现输入框。输入问题后：
+
+- `Enter` 提交
+- `Shift + Enter` 换行
+
+#### 第三步：查看批注卡片
+
+AI 回答生成后会变成当前文件的批注卡片。卡片会按照引用原文在文件中的顺序排列，不按提问时间排序。
+
+#### 第四步：回到原文或保存为笔记
+
+你可以：
+
+- 点击批注卡片，定位回原文
+- 展开/收起长回答
+- 编辑批注内容
+- 将批注保存为 Markdown 笔记
+
+默认生成目录：
 
 ```text
 MarginAI/Annotations
 ```
 
-### 隐私和数据所有权
+---
 
-MarginAI 是 local-first 的 Obsidian 插件。批注数据保存在本地插件数据和你的 vault 中。插件不会提供托管后端；AI 请求只会发送到你自己配置的 API endpoint。
+### 可选：自定义回答 Skills
 
-如果启用联网搜索，搜索关键词和请求会发送到你配置的搜索服务。
+内置 skills 位于：
 
-### 开源状态
+```text
+plugin/skills/*.json
+```
 
-这是一个早期项目。欢迎提交 issue、建议、回答 skill、UI 改进和代码贡献。当前重点是把“选中原文 -> 提问/批注 -> 回到原文 -> 生成笔记”的核心阅读闭环做稳。
+它们控制不同问题类型的回答方式，例如概念解释、困惑澄清、总结、翻译、写作和推断。
+
+如果你想覆盖内置策略，可以在 Obsidian vault 中创建：
+
+```text
+MarginAI/Skills
+```
+
+放入同样格式的 JSON skill。相同 `intent` 的自定义 skill 会覆盖内置 skill。
+
+---
+
+### 适合谁用？
+
+- 使用 Obsidian 阅读论文、访谈、长文或技术文档的人
+- 希望批注和原文绑定，而不是散落在聊天记录里的人
+- 想把 AI 回答沉淀成 Markdown 笔记的人
+- 想保留自己阅读理解过程的人
+- 想本地保存数据、自己配置 AI 服务的人
+
+---
+
+### 注意事项
+
+- 这是早期项目，建议先在测试 vault 里试用。
+- AI 请求会发送到你配置的 API endpoint。
+- API key 保存在本地 Obsidian 插件数据中。
+- 如果开启联网搜索，搜索请求会发送到你配置的搜索服务。
+- 插件不会提供托管后端，批注数据保存在本地插件数据和你的 vault 中。
+
+---
 
 ## English
 
-MarginAI is an Obsidian plugin for AI-assisted reading annotations. It is not a generic "chat with document" tool: answers are attached to the exact source text you selected, so the question, quote, and interpretation stay close to the reading context.
+> Select a passage, ask AI a question or write your own note, and keep the answer attached to the source text. MarginAI keeps reading questions, explanations, and annotations close to the exact text they came from.
 
-### What It Does
+[简体中文](#简体中文) | English
 
-When reading long essays, papers, interviews, or technical docs, questions often come from a specific passage. MarginAI helps you:
+### What problem does this plugin solve?
 
-- select source text in a Markdown note;
-- ask AI about that exact selection or write a personal annotation;
-- manage annotations in a sidebar scoped to the current file;
-- jump from an annotation back to the source text;
-- optionally turn an annotation into a Markdown note in your vault.
+When reading long essays, papers, interviews, or technical documents, the real question usually comes from one specific passage:
 
-### Current Features
+- You see a concept and want to ask what it means.
+- You read an argument and want to understand why the author says it.
+- You want to write down your own interpretation without breaking the source note.
+- You want to revisit the exact source text later from the annotation.
 
-- File-scoped annotation sidebar for the active Markdown file.
-- AI annotations through an OpenAI-compatible API.
-- Personal annotations without calling AI.
-- Source navigation from cards back to the selected passage.
-- Expand/collapse cards, sorted by source order.
-- Editable annotation bodies.
-- Markdown note generation inside the vault.
-- Inspectable and overrideable JSON answer skills.
-- Optional web search enrichment through Tavily or a custom URL-template provider.
+MarginAI attaches annotations to selected source text. You can ask AI or write personal notes, and all annotations appear in a sidebar scoped to the current file, sorted by source order.
 
-### Installation and Local Testing
+---
+
+### What can it do?
+
+| Feature | How to use it | Output |
+| --- | --- | --- |
+| AI annotation | Select text and run `MarginAI: 对选中文本提问` | AI-generated explanation, summary, translation, or inference |
+| Personal annotation | Select text and run `MarginAI: 增加批注` | A saved note without calling AI |
+| File-scoped sidebar | Open a Markdown file and view the MarginAI panel | Annotations for the current file only, sorted by source order |
+| Source navigation | Click an annotation card | Jump back to the source passage |
+| Edit annotation | Use the card menu | Update generated or handwritten annotation content |
+| Save as note | Use the card menu | Generate a Markdown note in your vault |
+| Answer skills | Use built-in or custom JSON skills | Different prompt strategies for explanation, summary, translation, writing, and inference |
+| Web search | Enable Tavily or a custom search endpoint | Add external context for concept explanations and discussions |
+
+---
+
+### Installation
 
 MarginAI is still early and is not yet published to the Obsidian community plugin directory. To install manually:
 
-```bash
-cd plugin
-npm install
-npm run build
-```
+1. Download or clone this repository:
 
-Copy these files into your Obsidian vault:
+   ```bash
+   git clone https://github.com/Shjjkh/MarginAI.git
+   cd MarginAI/plugin
+   ```
+
+2. Install dependencies and build:
+
+   ```bash
+   npm install
+   npm run build
+   ```
+
+3. Create a plugin folder in your Obsidian vault:
+
+   ```text
+   .obsidian/plugins/margin-ai/
+   ```
+
+4. Copy these files into it:
+
+   ```text
+   plugin/manifest.json
+   plugin/main.js
+   plugin/styles.css
+   plugin/skills/
+   ```
+
+5. Restart Obsidian, then enable MarginAI from Settings -> Community plugins.
+
+---
+
+### Quick Start
+
+#### Step 1: Configure your AI provider
+
+Open MarginAI settings and fill in:
 
 ```text
-.obsidian/plugins/margin-ai/
-  manifest.json
-  main.js
-  styles.css
-  skills/
+API Base URL: https://api.openai.com/v1
+API Key: your API key
+Model: your model name
 ```
 
-Restart Obsidian or reload the plugin from settings.
+MarginAI uses an OpenAI-compatible API. You can also use compatible gateways or local model endpoints.
 
-### Configuration
+#### Step 2: Select text and ask a question
 
-Configure MarginAI from the plugin settings:
+Select a passage in a Markdown file and run:
 
-- API Base URL: any OpenAI-compatible endpoint, including OpenAI, compatibility gateways, or local model gateways.
-- API Key: stored only in local Obsidian plugin data.
-- Model: the model name to call.
-- Custom Skills Folder: defaults to `MarginAI/Skills` for overriding built-in answer strategies.
-- Web Search: optional. Tavily is supported by default; custom URL templates are available for advanced users.
+```text
+MarginAI: 对选中文本提问
+```
 
-Default generated annotation note folder:
+Type your question in the sidebar:
+
+- `Enter` submits
+- `Shift + Enter` inserts a new line
+
+#### Step 3: Review annotation cards
+
+After the answer is generated, it appears as an annotation card for the current file. Cards are sorted by the position of the source text, not by creation time.
+
+#### Step 4: Revisit source text or save a note
+
+You can:
+
+- click a card to locate the source text
+- expand or collapse long answers
+- edit the annotation body
+- save the annotation as a Markdown note
+
+Default generated note folder:
 
 ```text
 MarginAI/Annotations
 ```
 
-### Privacy and Data Ownership
+---
 
-MarginAI is a local-first Obsidian plugin. Annotation data is stored in local plugin data and your vault. The plugin does not provide a hosted backend; AI requests are sent only to the API endpoint you configure.
+### Optional: Custom Answer Skills
 
-If web search is enabled, search queries and requests are sent to your configured search provider.
+Built-in skills live in:
 
-### Open Source Status
+```text
+plugin/skills/*.json
+```
 
-This is an early-stage project. Issues, product feedback, answer skills, UI improvements, and code contributions are welcome. The current priority is making the core reading loop reliable: select source text, ask or annotate, revisit the source, and optionally generate a durable Markdown note.
+They control how MarginAI answers different intents, such as concept explanation, confusion, summary, translation, writing, and inference.
+
+To override built-in behavior, create this folder in your vault:
+
+```text
+MarginAI/Skills
+```
+
+Add JSON skill files with the same format. A custom skill with the same `intent` overrides the built-in version.
+
+---
+
+### Who is this for?
+
+- Obsidian users reading papers, interviews, long essays, or technical docs
+- Readers who want annotations attached to exact source passages
+- Users who want AI answers saved as durable Markdown notes
+- People who want to preserve their reading and thinking process
+- Users who prefer local-first data and self-configured AI providers
+
+---
+
+### Notes
+
+- This is an early-stage project. Test it in a separate vault first.
+- AI requests are sent to the API endpoint you configure.
+- API keys are stored in local Obsidian plugin data.
+- If web search is enabled, search requests are sent to your configured search provider.
+- MarginAI does not provide a hosted backend. Annotation data stays in local plugin data and your vault.
+
+---
 
 ## Development
-
-The active Obsidian plugin project lives in [`plugin/`](plugin/).
 
 ```bash
 cd plugin
