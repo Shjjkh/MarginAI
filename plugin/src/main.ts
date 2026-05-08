@@ -163,14 +163,297 @@ const INTENT_CLASS_NAMES: Record<AnnotationIntent, string> = {
   writing: 'is-writing'
 }
 
-const BUILTIN_SKILL_FILES = [
-  'translation.json',
-  'summary.json',
-  'writing.json',
-  'inference.json',
-  'concept.json',
-  'confusion.json',
-  'discussion.json'
+const BUILTIN_SKILLS: AnswerSkill[] = [
+  {
+    "intent": "translation",
+    "id": "translate-faithfully",
+    "match": [
+      "翻译",
+      "译成",
+      "译为",
+      "translate",
+      "translation",
+      "英文",
+      "英语",
+      "中文",
+      "日文",
+      "日语",
+      "韩文",
+      "韩语"
+    ],
+    "goal": "翻译或用另一种语言表达已选内容。",
+    "boundaries": [
+      "忠实于已选原文。",
+      "不解释、不评论、不扩展，除非用户明确要求。",
+      "如果原文有歧义，保留歧义，不擅自补充。"
+    ],
+    "process": [
+      "先判断目标语言或表达形式。",
+      "再保持原文层次、语气和含义。",
+      "最后删除任何说明性开头。"
+    ],
+    "finalOutput": [
+      "直接给译文或改写后的文本。",
+      "保持原文层次和语气。",
+      "不要加”翻译如下”。"
+    ],
+    "includeContext": false,
+    "allowBackgroundKnowledge": false,
+    "lengthHint": "长度跟随原文。"
+  },
+  {
+    "intent": "summary",
+    "id": "summary-compress",
+    "match": [
+      "总结",
+      "概括",
+      "归纳",
+      "提炼",
+      "摘要",
+      "要点",
+      "summary",
+      "summarize",
+      "tl;dr",
+      "main points"
+    ],
+    "goal": "总结、概括或提炼已选内容。",
+    "boundaries": [
+      "只基于已选原文和提供的上下文。",
+      "不加入外部背景，不展开评价。",
+      "不要把例子、修辞或旁枝信息当成核心结论。"
+    ],
+    "process": [
+      "先找主语、动作、判断和因果关系。",
+      "删去重复、例子和修饰。",
+      "保留原文的重点顺序。"
+    ],
+    "finalOutput": [
+      "直接输出简短摘要。",
+      "如果用户要求要点，则用 3-5 条项目符号。",
+      "不要加入”原文主要讲了”这类套话。"
+    ],
+    "includeContext": false,
+    "allowBackgroundKnowledge": false,
+    "lengthHint": "优先使用 1 个短段落。"
+  },
+  {
+    "intent": "writing",
+    "id": "rewrite-preserve-meaning",
+    "match": [
+      "改写",
+      "润色",
+      "优化表达",
+      "换个说法",
+      "更通俗",
+      "更学术",
+      "整理成",
+      "rewrite",
+      "polish",
+      "paraphrase"
+    ],
+    "goal": "按用户要求改写、润色或整理已选内容。",
+    "boundaries": [
+      "保留已选原文的核心含义。",
+      "可以优化表达方式，但不要新增原文没有的事实。",
+      "如果用户要求风格变化，只改变表达，不改变立场。"
+    ],
+    "process": [
+      "先识别用户要求的风格或用途。",
+      "再保留原文事实、关系和语气边界。",
+      "最后输出可直接替换或保存的文本。"
+    ],
+    "finalOutput": [
+      "直接给改写结果。",
+      "如果用户要求多版本，最多给 2-3 个版本。",
+      "不解释修改过程，除非用户要求。"
+    ],
+    "includeContext": false,
+    "allowBackgroundKnowledge": false,
+    "lengthHint": "长度接近原文，除非用户要求压缩或扩写。"
+  },
+  {
+    "intent": "inference",
+    "id": "structure-preserving-inference",
+    "match": [
+      "猜测",
+      "推测",
+      "推断",
+      "估计",
+      "可能",
+      "大概",
+      "意味着",
+      "说明了什么",
+      "可以看出",
+      "如何理解",
+      "怎么看",
+      "分析一下",
+      "展开",
+      "具体是",
+      "具体会",
+      "背后",
+      "影响",
+      "原因",
+      "结果",
+      "区别",
+      "联系",
+      "结构",
+      "逻辑",
+      "workflow",
+      "infer",
+      "inference",
+      "imply",
+      "implication",
+      "analyze",
+      "analysis"
+    ],
+    "goal": "基于已选原文做谨慎、贴合语境的增量推理，帮助读者从原文已有信息走向更具体、更可理解的含义、影响、机制、场景或可能结论。",
+    "boundaries": [
+      "最高优先级：先尊重原文结构。如果原文已有标题、列表、顺序、分类、步骤、对比关系或论证层次，优先沿用它们，不要轻易重命名或另造框架。",
+      "不要复述式改写原文。每一段回答都应该比原文多一层理解价值，例如解释含义、推导影响、补出机制、指出条件、给出具体场景或澄清边界。",
+      "推断必须贴着原文走。区分原文直接支持、合理推断和不确定猜测；不确定处使用”可能”、”大概率”、”更像是”、”可推断”等措辞。",
+      "不要引入原文和上下文没有支撑的专有事件、组织背景、人物关系、案例或数据。",
+      "不要为了显得高级而强行加入冲突、框架、优缺点、风险或宏大总结；只有用户问题需要或原文明显暗示时才写。"
+    ],
+    "process": [
+      "先判断用户真正要的推理类型：解释含义、推断影响、补全机制、具体化场景、比较差异、推导原因/结果，还是判断边界。",
+      "再检查原文有没有现成结构；有结构就沿用原文结构，没有结构再自行组织答案。",
+      "抽取能支撑推断的关键词、关系和限制条件，避免平均复述所有信息。",
+      "选择最适合问题的推理维度展开，例如对象、动作、原因、结果、条件、约束、例外、影响、应用场景、操作方式或判断标准。",
+      "最后检查答案是否回答了用户问题，而不是只生成了一个漂亮但脱离问题的模板。"
+    ],
+    "finalOutput": [
+      "如果原文已有清晰结构，直接沿用原文结构和顺序作为回答骨架；如果没有，再使用自然的小节或要点组织。",
+      "每个要点都应提供增量推理，不要只把原文换一种说法。",
+      "优先回答用户问的具体方向；不要机械套用固定小节名。",
+      "需要时可以用短句标明确定性，例如”原文直接说明的是...”、”可推断的是...”、”不确定的是...”。",
+      "结尾可以给一个简短整体判断，但不能替代主体分析。"
+    ],
+    "includeContext": true,
+    "allowBackgroundKnowledge": true,
+    "lengthHint": "默认中等偏详细；根据原文结构和用户问题决定长度，通常 3-8 个高信息量要点或若干短段落。"
+  },
+  {
+    "intent": "concept",
+    "id": "concept-bridge",
+    "match": [
+      "是什么",
+      "什么意思",
+      "含义",
+      "概念",
+      "定义",
+      "区别",
+      "关系",
+      "解释一下",
+      "什么是",
+      "meaning",
+      "concept",
+      "define",
+      "definition",
+      "explain"
+    ],
+    "goal": "为读者专业、充分地解释概念、术语或背景知识，帮助读者从不理解进入可理解的框架，并把解释连接回用户选中的原文。",
+    "boundaries": [
+      "可以使用通用知识解释概念。",
+      "如果概念在已选原文中有特殊含义，优先解释它在本文语境中的含义。",
+      "区分”原文中的含义”和”背景补充”，不要把背景补充说成原文观点。",
+      "可以补充必要的背景、机制、典型场景和简单例子，但不要离开用户问题泛泛写百科。"
+    ],
+    "process": [
+      "先识别用户真正想弄清的概念。",
+      "再判断已选原文是否给了特殊语境。",
+      "用定义、运作方式、为什么重要、文章语境、例子或类比建立理解框架。",
+      "最后指出读者带回原文时应该抓住的关键点。"
+    ],
+    "finalOutput": [
+      "先给清楚定义，不要只给一句话。",
+      "再解释它通常如何运作、为什么重要，或它解决了什么问题。",
+      "说明它和已选原文的关系。",
+      "必要时给一个简单例子、类比或易混点。"
+    ],
+    "includeContext": true,
+    "allowBackgroundKnowledge": true,
+    "lengthHint": "默认给 4-7 个短段落或 5-8 条要点；用户明确要求简短时再压缩。"
+  },
+  {
+    "intent": "confusion",
+    "id": "reader-confusion-resolver",
+    "match": [
+      "为什么",
+      "为何",
+      "怎么理解",
+      "如何理解",
+      "没懂",
+      "不懂",
+      "看不懂",
+      "疑惑",
+      "逻辑",
+      "推理",
+      "依据",
+      "why",
+      "confus",
+      "understand"
+    ],
+    "goal": "解释用户对原文观点、句子或推理产生的疑惑。",
+    "boundaries": [
+      "只能优先依据已选原文和提供的上下文。",
+      "不要替原文补充不存在的论据。",
+      "如果原文没有直接说明原因，第一句写”原文未直接说明。”，再说明可推断部分或无法判断。"
+    ],
+    "process": [
+      "先找出用户卡住的是词义、句意、逻辑关系还是作者立场。",
+      "再用原文中的线索重建推理链条。",
+      "必要时拆开关键句、隐含前提和因果关系。",
+      "最后指出最容易误解的地方。"
+    ],
+    "finalOutput": [
+      "先用一句话说明原文大意。",
+      "再解释原文的推理链条或容易误解的地方。",
+      "如果用户明显不理解，分步骤解释到足够清楚。",
+      "如果依据不足，明确说无法从原文判断。"
+    ],
+    "includeContext": true,
+    "allowBackgroundKnowledge": false,
+    "lengthHint": "默认 3-5 个短段落或 4-6 条要点；用户明确要求简短时再压缩。"
+  },
+  {
+    "intent": "discussion",
+    "id": "source-grounded-discussion",
+    "match": [
+      "怎么看",
+      "是否成立",
+      "合理吗",
+      "评价",
+      "深入",
+      "展开",
+      "讨论",
+      "启发",
+      "延伸",
+      "think",
+      "discuss",
+      "evaluate",
+      "analysis",
+      "analyze"
+    ],
+    "goal": "围绕已选原文进行深入讨论、评价或延伸思考。",
+    "boundaries": [
+      "先说明原文明确表达了什么。",
+      "可以展开分析，但必须把”原文依据”和”延伸判断”分开。",
+      "不要编造原文没有的信息。"
+    ],
+    "process": [
+      "先提炼原文可支持的核心判断。",
+      "再判断用户问题需要评价、反驳、延伸还是启发。",
+      "最后分开写原文依据和你的延伸分析。"
+    ],
+    "finalOutput": [
+      "先给核心判断。",
+      "然后展开 2-4 个分析点。",
+      "需要延伸时，用”进一步看”或自然转折区分延伸判断。"
+    ],
+    "includeContext": true,
+    "allowBackgroundKnowledge": true,
+    "lengthHint": "默认中等篇幅，约 4-6 个短段落或 4-7 条要点；避免长篇泛泛而谈。"
+  }
 ]
 
 function normalizeAiAnswer(answer: string): string {
@@ -1376,17 +1659,7 @@ export default class MarginAIPlugin extends Plugin {
   }
 
   private async loadBuiltInSkills(): Promise<AnswerSkill[]> {
-    const skills: AnswerSkill[] = []
-    for (const fileName of BUILTIN_SKILL_FILES) {
-      const path = `${this.manifest.dir}/skills/${fileName}`
-      try {
-        const json = await this.app.vault.adapter.read(path)
-        skills.push(parseAnswerSkill(JSON.parse(json), path))
-      } catch (error) {
-        console.warn(`MarginAI failed to load built-in skill ${path}`, error)
-      }
-    }
-    return skills
+    return BUILTIN_SKILLS
   }
 
   private async loadCustomSkills(): Promise<AnswerSkill[]> {
