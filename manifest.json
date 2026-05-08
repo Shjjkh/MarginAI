@@ -1,0 +1,10 @@
+{
+  "id": "margin-ai",
+  "name": "MarginAI",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "AI-assisted reading annotations that stay visible in your Obsidian vault.",
+  "author": "MarginAI",
+  "authorUrl": "",
+  "isDesktopOnly": true
+}
